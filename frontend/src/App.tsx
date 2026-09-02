@@ -1,12 +1,20 @@
 import { useEffect, useState } from "react";
 import type { paths } from "./types/api-generated";
+import "./App.css";
 
 type MembersResponse =
   paths["/members"]["get"]["responses"][200]["content"]["application/json"];
 
+type MemberDetailResponse =
+  paths["/members/{member_id}"]["get"]["responses"][200]["content"]["application/json"];
+
 function App() {
   const [members, setMembers] = useState<MembersResponse>([]);
+  const [selectedMember, setSelectedMember] =
+    useState<MemberDetailResponse | null>(null);
+
   const [isLoading, setIsLoading] = useState(true);
+  const [isDetailLoading, setIsDetailLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
@@ -30,12 +38,33 @@ function App() {
     void loadMembers();
   }, []);
 
+  async function loadMemberDetail(memberId: string) {
+    setIsDetailLoading(true);
+    setErrorMessage("");
+
+    try {
+      const response = await fetch(
+        `http://localhost:8000/members/${encodeURIComponent(memberId)}`,
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+
+      const data: MemberDetailResponse = await response.json();
+      setSelectedMember(data);
+    } catch {
+      setErrorMessage("Failed to fetch member detail");
+    } finally {
+      setIsDetailLoading(false);
+    }
+  }
+
   return (
     <main>
       <h1>Structural Members</h1>
 
       {isLoading && <p>Loading members...</p>}
-
       {errorMessage && <p>{errorMessage}</p>}
 
       {!isLoading && !errorMessage && members.length === 0 && (
@@ -58,7 +87,14 @@ function App() {
           <tbody>
             {members.map((member) => (
               <tr key={member.member_id}>
-                <td>{member.member_id}</td>
+                <td>
+                  <button
+                    type="button"
+                    onClick={() => void loadMemberDetail(member.member_id)}
+                  >
+                    {member.member_id}
+                  </button>
+                </td>
                 <td>{member.member_type}</td>
                 <td>{member.storey_id}</td>
                 <td>{member.dimension_id}</td>
@@ -69,6 +105,50 @@ function App() {
           </tbody>
         </table>
       )}
+
+      <section>
+        <h2>Member Detail</h2>
+
+        {isDetailLoading && <p>Loading detail...</p>}
+
+        {!isDetailLoading && selectedMember === null && (
+          <p>Select a member from the table.</p>
+        )}
+
+        {!isDetailLoading && selectedMember !== null && (
+          <>
+            <p>Member ID: {selectedMember.member_id}</p>
+            <p>Member type: {selectedMember.member_type}</p>
+            <p>Storey: {selectedMember.storey_id}</p>
+            <p>Dimension: {selectedMember.dimension_id}</p>
+            <p>Material: {selectedMember.material_id}</p>
+            <p>Zone: {selectedMember.zone_id}</p>
+
+            <h3>Geometry Points</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>Point</th>
+                  <th>X (mm)</th>
+                  <th>Y (mm)</th>
+                  <th>Z (mm)</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {selectedMember.geometry_points.map((point, index) => (
+                  <tr key={`${selectedMember.member_id}-point-${index}`}>
+                    <td>P{index + 1}</td>
+                    <td>{point[0]}</td>
+                    <td>{point[1]}</td>
+                    <td>{point[2]}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </>
+        )}
+      </section>
     </main>
   );
 }
