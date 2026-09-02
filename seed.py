@@ -1,0 +1,214 @@
+from sqlalchemy.orm import Session
+
+from database import engine
+from models import Dimension, Grid, Material, Member, Storey, Zone
+
+
+def make_member(
+    member_id: str,
+    member_type: str,
+    dimension_id: str,
+    material_id: str,
+    zone_id: str,
+    points: list[list[int]],
+) -> Member:
+    return Member(
+        member_id=member_id,
+        member_type=member_type,
+        storey_id="02",
+        dimension_id=dimension_id,
+        material_id=material_id,
+        zone_id=zone_id,
+        geometry_points=points,
+    )
+
+
+def seed_data() -> None:
+    with Session(engine) as session, session.begin():
+        session.add_all(
+            [
+                Dimension(
+                    dimension_id="C1",
+                    member_type="col",
+                    dim={
+                        "shape": "rectangular",
+                        "width": 300,
+                        "depth": 300,
+                    },
+                ),
+                Dimension(
+                    dimension_id="C2",
+                    member_type="col",
+                    dim={"shape": "circular", "diameter": 300},
+                ),
+                Dimension(
+                    dimension_id="B1",
+                    member_type="beam",
+                    dim={
+                        "shape": "rectangular",
+                        "width": 150,
+                        "depth": 300,
+                    },
+                ),
+                Dimension(
+                    dimension_id="W1",
+                    member_type="wall",
+                    dim={"thickness": 100},
+                ),
+                Dimension(
+                    dimension_id="S1",
+                    member_type="slab",
+                    dim={"thickness": 120},
+                ),
+            ]
+        )
+
+        session.add_all(
+            [
+                Material(
+                    material_id="K100",
+                    material_name="concrete K100",
+                    material_type="concrete",
+                ),
+                Material(
+                    material_id="K250",
+                    material_name="concrete K250",
+                    material_type="concrete",
+                ),
+            ]
+        )
+
+        session.add_all(
+            [
+                Zone(
+                    zone_id="Z01",
+                    zone_name="columns and walls",
+                ),
+                Zone(
+                    zone_id="Z02",
+                    zone_name="roof beams and slab",
+                ),
+            ]
+        )
+
+        session.add_all(
+            [
+                Storey(
+                    storey_id="01",
+                    storey_name="base level",
+                    elevation_mm=0,
+                ),
+                Storey(
+                    storey_id="02",
+                    storey_name="roof level",
+                    elevation_mm=3000,
+                ),
+            ]
+        )
+
+        session.add_all(
+            [
+                Grid(
+                    grid_axis="x",
+                    grid_label="1",
+                    coordinate_mm=0,
+                ),
+                Grid(
+                    grid_axis="x",
+                    grid_label="2",
+                    coordinate_mm=4000,
+                ),
+                Grid(
+                    grid_axis="y",
+                    grid_label="A",
+                    coordinate_mm=0,
+                ),
+                Grid(
+                    grid_axis="y",
+                    grid_label="B",
+                    coordinate_mm=3000,
+                ),
+            ]
+        )
+
+        session.flush()
+
+        session.add_all(
+            [
+                make_member(
+                    "C2.02.A1", "col", "C2", "K250", "Z01",
+                    [[0, 0, 0], [0, 0, 3000]],
+                ),
+                make_member(
+                    "C2.02.A2", "col", "C2", "K250", "Z01",
+                    [[4000, 0, 0], [4000, 0, 3000]],
+                ),
+                make_member(
+                    "C1.02.B2", "col", "C1", "K250", "Z01",
+                    [[4000, 3000, 0], [4000, 3000, 3000]],
+                ),
+                make_member(
+                    "C1.02.B1", "col", "C1", "K250", "Z01",
+                    [[0, 3000, 0], [0, 3000, 3000]],
+                ),
+                make_member(
+                    "B1.02.A1A2", "beam", "B1", "K250", "Z02",
+                    [[0, 0, 3000], [4000, 0, 3000]],
+                ),
+                make_member(
+                    "B1.02.A2B2", "beam", "B1", "K250", "Z02",
+                    [[4000, 0, 3000], [4000, 3000, 3000]],
+                ),
+                make_member(
+                    "B1.02.B2B1", "beam", "B1", "K250", "Z02",
+                    [[4000, 3000, 3000], [0, 3000, 3000]],
+                ),
+                make_member(
+                    "B1.02.B1A1", "beam", "B1", "K250", "Z02",
+                    [[0, 3000, 3000], [0, 0, 3000]],
+                ),
+                make_member(
+                    "S1.02.A1A2B2B1", "slab", "S1", "K250", "Z02",
+                    [
+                        [0, 0, 3000],
+                        [4000, 0, 3000],
+                        [4000, 3000, 3000],
+                        [0, 3000, 3000],
+                    ],
+                ),
+                make_member(
+                    "W1.02.A1B1", "wall", "W1", "K100", "Z01",
+                    [
+                        [0, 0, 0],
+                        [0, 3000, 0],
+                        [0, 3000, 3000],
+                        [0, 0, 3000],
+                    ],
+                ),
+                make_member(
+                    "W1.02.B1B2", "wall", "W1", "K100", "Z01",
+                    [
+                        [0, 3000, 0],
+                        [4000, 3000, 0],
+                        [4000, 3000, 3000],
+                        [0, 3000, 3000],
+                    ],
+                ),
+                make_member(
+                    "W1.02.B2A2", "wall", "W1", "K100", "Z01",
+                    [
+                        [4000, 3000, 0],
+                        [4000, 0, 0],
+                        [4000, 0, 3000],
+                        [4000, 3000, 3000],
+                    ],
+                ),
+            ]
+        )
+
+    print("Seed completed: 5 dimensions, 2 materials, 2 zones,")
+    print("2 storeys, 4 grids, and 12 members inserted.")
+
+
+if __name__ == "__main__":
+    seed_data()
