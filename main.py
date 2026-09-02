@@ -1,3 +1,4 @@
+import os
 from typing import Annotated
 
 from fastapi import Depends, FastAPI, status
@@ -11,10 +12,14 @@ from schemas import MemberResponse
 
 app = FastAPI()
 
+frontend_origin = os.getenv(
+    "FRONTEND_ORIGIN",
+    "http://localhost:5173",
+)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=[frontend_origin],
     allow_methods=["*"],
     allow_headers=["*"],
 )
