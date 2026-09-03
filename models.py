@@ -47,7 +47,8 @@ class Zone(Base):
 
     zone_id: Mapped[str] = mapped_column(String, primary_key=True)
     zone_name: Mapped[str] = mapped_column(String)
-
+    pour_sequence: Mapped[int] = mapped_column(Integer)
+    
 
 class Storey(Base):
     __tablename__ = "storeys"

@@ -83,10 +83,12 @@ def seed_data() -> None:
                 Zone(
                     zone_id="Z01",
                     zone_name="columns and walls",
+                    pour_sequence=1,
                 ),
                 Zone(
                     zone_id="Z02",
                     zone_name="roof beams and slab",
+                    pour_sequence=2,
                 ),
             ]
         )
