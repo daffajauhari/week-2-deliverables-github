@@ -40,6 +40,7 @@ class Material(Base):
     material_id: Mapped[str] = mapped_column(String, primary_key=True)
     material_name: Mapped[str] = mapped_column(String)
     material_type: Mapped[str] = mapped_column(String)
+    compressive_strength_kg_cm2: Mapped[int] = mapped_column(Integer)
 
 
 class Zone(Base):
