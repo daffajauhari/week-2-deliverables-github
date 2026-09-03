@@ -81,6 +81,34 @@ export interface components {
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
         };
+        /** MemberDetailResponse */
+        MemberDetailResponse: {
+            /** Member Id */
+            member_id: string;
+            /**
+             * Member Type
+             * @enum {string}
+             */
+            member_type: "col" | "beam" | "wall" | "slab";
+            /** Storey Id */
+            storey_id: string;
+            /** Dimension Id */
+            dimension_id: string;
+            /** Material Id */
+            material_id: string;
+            /** Zone Id */
+            zone_id: string;
+            /** Geometry Points */
+            geometry_points: number[][];
+            /** Storey Name */
+            storey_name: string;
+            /** Material Strength Kg Cm2 */
+            material_strength_kg_cm2: number;
+            /** Dimension Section */
+            dimension_section: {
+                [key: string]: string | number;
+            };
+        };
         /** MemberResponse */
         MemberResponse: {
             /** Member Id */
@@ -204,7 +232,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["MemberResponse"];
+                    "application/json": components["schemas"]["MemberDetailResponse"];
                 };
             };
             /** @description Validation Error */

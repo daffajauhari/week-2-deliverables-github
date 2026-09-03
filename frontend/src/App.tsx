@@ -82,7 +82,6 @@ function App() {
               <th>Storey</th>
               <th>Dimension</th>
               <th>Material</th>
-              <th>Zone</th>
             </tr>
           </thead>
 
@@ -101,7 +100,6 @@ function App() {
                 <td>{member.storey_id}</td>
                 <td>{member.dimension_id}</td>
                 <td>{member.material_id}</td>
-                <td>{member.zone_id}</td>
               </tr>
             ))}
           </tbody>
@@ -121,10 +119,6 @@ function App() {
           <>
             <p>Member ID: {selectedMember.member_id}</p>
             <p>Member type: {selectedMember.member_type}</p>
-            <p>Storey: {selectedMember.storey_id}</p>
-            <p>Dimension: {selectedMember.dimension_id}</p>
-            <p>Material: {selectedMember.material_id}</p>
-            <p>Zone: {selectedMember.zone_id}</p>
 
             <h3>Geometry Points</h3>
             <table>
@@ -148,6 +142,26 @@ function App() {
                 ))}
               </tbody>
             </table>
+            
+            <h3>Material Strength</h3>
+            <p>{selectedMember.material_strength_kg_cm2} kg/cm&sup2;</p>
+
+            <h3>Dimension Section</h3>
+            <table>
+              <tbody>
+                {Object.entries(selectedMember.dimension_section).map(
+                  ([field, value]) => (
+                    <tr key={field}>
+                      <th>{field}</th>
+                      <td>{value}</td>
+                    </tr>
+                  ),
+                )}
+              </tbody>
+            </table>
+
+            <h3>Storey</h3>
+            <p>{selectedMember.storey_name}</p>
           </>
         )}
       </section>
