@@ -8,6 +8,8 @@ type MembersResponse =
 type MemberDetailResponse =
   paths["/members/{member_id}"]["get"]["responses"][200]["content"]["application/json"];
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 function App() {
   const [members, setMembers] = useState<MembersResponse>([]);
   const [selectedMember, setSelectedMember] =
@@ -20,7 +22,7 @@ function App() {
   useEffect(() => {
     async function loadMembers() {
       try {
-        const response = await fetch("http://localhost:8000/members");
+        const response = await fetch(`${API_BASE_URL}/members`);
 
         if (!response.ok) {
           throw new Error(`HTTP ${response.status}`);
@@ -44,7 +46,7 @@ function App() {
 
     try {
       const response = await fetch(
-        `http://localhost:8000/members/${encodeURIComponent(memberId)}`,
+        `${API_BASE_URL}/members/${encodeURIComponent(memberId)}`,
       );
 
       if (!response.ok) {
@@ -62,93 +64,170 @@ function App() {
 
   return (
     <main>
-      <h1>Structural Members</h1>
+      <header className="page-header">
+        <h1>Structural Members</h1>
+        <p className="page-subtitle">
+          Browse the member schedule and open a row to inspect its geometry,
+          material, and section detail.
+        </p>
+      </header>
 
-      {isLoading && <p>Loading members...</p>}
-      {errorMessage && <p>{errorMessage}</p>}
+      <div className="layout">
+        <section className="panel">
+          <div className="panel-head">
+            <h2>Members</h2>
+            {members.length > 0 && (
+              <span className="count-chip">{members.length} total</span>
+            )}
+          </div>
 
-      {!isLoading && !errorMessage && members.length === 0 && (
-        <p>No members found.</p>
-      )}
+          {isLoading && <p className="status-line">Loading members...</p>}
+          {errorMessage && (
+            <p className="status-line is-error">{errorMessage}</p>
+          )}
 
-      {members.length > 0 && (
-        <table>
-          <thead>
-            <tr>
-              <th>Member ID</th>
-              <th>Type</th>
-              <th>Storey</th>
-              <th>Dimension</th>
-              <th>Material</th>
-              <th>Zone</th>
-            </tr>
-          </thead>
+          {!isLoading && !errorMessage && members.length === 0 && (
+            <p className="status-line">No members found.</p>
+          )}
 
-          <tbody>
-            {members.map((member) => (
-              <tr key={member.member_id}>
-                <td>
-                  <button
-                    type="button"
-                    onClick={() => void loadMemberDetail(member.member_id)}
-                  >
-                    {member.member_id}
-                  </button>
-                </td>
-                <td>{member.member_type}</td>
-                <td>{member.storey_id}</td>
-                <td>{member.dimension_id}</td>
-                <td>{member.material_id}</td>
-                <td>{member.zone_id}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
-
-      <section>
-        <h2>Member Detail</h2>
-
-        {isDetailLoading && <p>Loading detail...</p>}
-
-        {!isDetailLoading && selectedMember === null && (
-          <p>Select a member from the table.</p>
-        )}
-
-        {!isDetailLoading && selectedMember !== null && (
-          <>
-            <p>Member ID: {selectedMember.member_id}</p>
-            <p>Member type: {selectedMember.member_type}</p>
-            <p>Storey: {selectedMember.storey_id}</p>
-            <p>Dimension: {selectedMember.dimension_id}</p>
-            <p>Material: {selectedMember.material_id}</p>
-            <p>Zone: {selectedMember.zone_id}</p>
-
-            <h3>Geometry Points</h3>
-            <table>
-              <thead>
-                <tr>
-                  <th>Point</th>
-                  <th>X (mm)</th>
-                  <th>Y (mm)</th>
-                  <th>Z (mm)</th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {selectedMember.geometry_points.map((point, index) => (
-                  <tr key={`${selectedMember.member_id}-point-${index}`}>
-                    <td>P{index + 1}</td>
-                    <td>{point[0]}</td>
-                    <td>{point[1]}</td>
-                    <td>{point[2]}</td>
+          {members.length > 0 && (
+            <div className="table-scroll">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Member ID</th>
+                    <th>Type</th>
+                    <th>Storey</th>
+                    <th>Dimension</th>
+                    <th>Material</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </>
-        )}
-      </section>
+                </thead>
+
+                <tbody>
+                  {members.map((member) => (
+                    <tr
+                      key={member.member_id}
+                      className={
+                        selectedMember?.member_id === member.member_id
+                          ? "is-selected"
+                          : undefined
+                      }
+                    >
+                      <td>
+                        <button
+                          type="button"
+                          className="member-id-button"
+                          onClick={() =>
+                            void loadMemberDetail(member.member_id)
+                          }
+                        >
+                          {member.member_id}
+                        </button>
+                      </td>
+                      <td>
+                        <span
+                          className={`type-badge type-${member.member_type}`}
+                        >
+                          {member.member_type}
+                        </span>
+                      </td>
+                      <td>{member.storey_id}</td>
+                      <td>{member.dimension_id}</td>
+                      <td>{member.material_id}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
+
+        <section className="panel">
+          <div className="panel-head">
+            <h2>Member Detail</h2>
+          </div>
+
+          {isDetailLoading && <p className="status-line">Loading detail...</p>}
+
+          {!isDetailLoading && selectedMember === null && (
+            <p className="detail-empty">Select a member from the table.</p>
+          )}
+
+          {!isDetailLoading && selectedMember !== null && (
+            <div className="detail-body">
+              <div className="detail-title">
+                <span className="member-id">{selectedMember.member_id}</span>
+                <span
+                  className={`type-badge type-${selectedMember.member_type}`}
+                >
+                  {selectedMember.member_type}
+                </span>
+              </div>
+
+              <div className="stat-row">
+                <div className="stat">
+                  <span className="stat-label">Material strength</span>
+                  <span className="stat-value">
+                    {selectedMember.material_strength_kg_cm2}
+                    <span className="unit">kg/cm&sup2;</span>
+                  </span>
+                </div>
+                <div className="stat">
+                  <span className="stat-label">Storey</span>
+                  <span className="stat-value">
+                    {selectedMember.storey_name}
+                  </span>
+                </div>
+                <div className="stat">
+                  <span className="stat-label">Pour sequence</span>
+                  <span className="stat-value">
+                    {selectedMember.pour_sequence}
+                  </span>
+                </div>
+              </div>
+
+              <div className="detail-section">
+                <h3>Dimension Section</h3>
+                <dl className="kv-grid">
+                  {Object.entries(selectedMember.dimension_section).map(
+                    ([field, value]) => (
+                      <div className="kv-cell" key={field}>
+                        <dt>{field}</dt>
+                        <dd>{value}</dd>
+                      </div>
+                    ),
+                  )}
+                </dl>
+              </div>
+
+              <div className="detail-section">
+                <h3>Geometry Points</h3>
+                <table className="points-table">
+                  <thead>
+                    <tr>
+                      <th>Point</th>
+                      <th>X (mm)</th>
+                      <th>Y (mm)</th>
+                      <th>Z (mm)</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    {selectedMember.geometry_points.map((point, index) => (
+                      <tr key={`${selectedMember.member_id}-point-${index}`}>
+                        <td>P{index + 1}</td>
+                        <td>{point[0]}</td>
+                        <td>{point[1]}</td>
+                        <td>{point[2]}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+        </section>
+      </div>
     </main>
   );
 }

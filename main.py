@@ -7,15 +7,12 @@ from sqlalchemy import select, text
 from sqlalchemy.orm import Session
 
 from database import engine, get_session
-from models import Member
-from schemas import MemberResponse
+from models import Dimension, Material, Member, Storey, Zone
+from schemas import MemberDetailResponse, MemberResponse
 
 app = FastAPI()
 
-frontend_origin = os.getenv(
-    "FRONTEND_ORIGIN",
-    "http://localhost:5173",
-)
+frontend_origin = os.environ["FRONTEND_ORIGIN"]
 
 app.add_middleware(
     CORSMiddleware,
@@ -61,13 +58,13 @@ def get_members(
 
 @app.get(
     "/members/{member_id}",
-    response_model=MemberResponse,
+    response_model=MemberDetailResponse,
     status_code=status.HTTP_200_OK,
 )
 def get_member(
     member_id: str,
     session: Annotated[Session, Depends(get_session)],
-) -> MemberResponse:
+) -> MemberDetailResponse:
     member = session.get(Member, member_id)
 
     if member is None:
@@ -76,4 +73,20 @@ def get_member(
             detail="Member not found",
         )
 
-    return MemberResponse.model_validate(member)
+    storey = session.get(Storey, member.storey_id)
+    material = session.get(Material, member.material_id)
+    dimension = session.get(Dimension, member.dimension_id)
+    zone = session.get(Zone, member.zone_id)
+    assert storey is not None
+    assert material is not None
+    assert dimension is not None
+    assert zone is not None
+
+
+    return MemberDetailResponse(
+        **MemberResponse.model_validate(member).model_dump(),
+        storey_name=storey.storey_name,
+        material_strength_kg_cm2=material.compressive_strength_kg_cm2,
+        dimension_section=dimension.dim,
+        pour_sequence=zone.pour_sequence,
+    )

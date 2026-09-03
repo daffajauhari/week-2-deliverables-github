@@ -13,3 +13,10 @@ class MemberResponse(BaseModel):
     material_id: str
     zone_id: str
     geometry_points: list[list[int]]
+
+class MemberDetailResponse(MemberResponse):
+    storey_name: str
+    material_strength_kg_cm2: int
+    dimension_section: dict[str, str | int]
+    pour_sequence: int
+
