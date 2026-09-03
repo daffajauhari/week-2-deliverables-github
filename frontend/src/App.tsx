@@ -8,6 +8,8 @@ type MembersResponse =
 type MemberDetailResponse =
   paths["/members/{member_id}"]["get"]["responses"][200]["content"]["application/json"];
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 function App() {
   const [members, setMembers] = useState<MembersResponse>([]);
   const [selectedMember, setSelectedMember] =
@@ -20,7 +22,7 @@ function App() {
   useEffect(() => {
     async function loadMembers() {
       try {
-        const response = await fetch("http://localhost:8000/members");
+        const response = await fetch(`${API_BASE_URL}/members`);
 
         if (!response.ok) {
           throw new Error(`HTTP ${response.status}`);
@@ -44,7 +46,7 @@ function App() {
 
     try {
       const response = await fetch(
-        `http://localhost:8000/members/${encodeURIComponent(memberId)}`,
+        `${API_BASE_URL}/members/${encodeURIComponent(memberId)}`,
       );
 
       if (!response.ok) {

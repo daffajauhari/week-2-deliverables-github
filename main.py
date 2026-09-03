@@ -12,10 +12,7 @@ from schemas import MemberResponse
 
 app = FastAPI()
 
-frontend_origin = os.getenv(
-    "FRONTEND_ORIGIN",
-    "http://localhost:5173",
-)
+frontend_origin = os.environ["FRONTEND_ORIGIN"]
 
 app.add_middleware(
     CORSMiddleware,
