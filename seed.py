@@ -69,11 +69,13 @@ def seed_data() -> None:
                     material_id="K100",
                     material_name="concrete K100",
                     material_type="concrete",
+                    compressive_strength_kg_cm2=100,
                 ),
                 Material(
                     material_id="K250",
                     material_name="concrete K250",
                     material_type="concrete",
+                    compressive_strength_kg_cm2=250,
                 ),
             ]
         )
