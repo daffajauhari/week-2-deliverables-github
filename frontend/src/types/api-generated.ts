@@ -108,6 +108,8 @@ export interface components {
             dimension_section: {
                 [key: string]: string | number;
             };
+            /** Pour Sequence */
+            pour_sequence: number;
         };
         /** MemberResponse */
         MemberResponse: {

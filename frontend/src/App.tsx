@@ -161,7 +161,9 @@ function App() {
             </table>
 
             <h3>Storey</h3>
-            <p>{selectedMember.storey_name}</p>
+            <p>{selectedMember.storey_name}</p>          
+            <h3>Pour Sequence</h3>
+            <p>{selectedMember.pour_sequence}</p>
           </>
         )}
       </section>
