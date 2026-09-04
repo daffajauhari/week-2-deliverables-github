@@ -1,0 +1,92 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: ci_user
+          POSTGRES_PASSWORD: ci_password
+          POSTGRES_DB: week2_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U ci_user"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=10
+
+    env:
+      POSTGRES_HOST: localhost
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: ci_user
+      POSTGRES_PASSWORD: ci_password
+      POSTGRES_DB: week2_db
+      TEST_POSTGRES_DB: week2_test_db
+      FRONTEND_ORIGIN: http://localhost:5173
+      VITE_API_BASE_URL: http://localhost:8000
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11.9"
+
+      - name: Install dependencies
+        run: python -m pip install -r requirements.txt
+
+      - name: Lint (ruff)
+        run: python -m ruff check .
+
+      - name: Type check (mypy)
+        run: python -m mypy .
+
+      - name: Apply migrations
+        run: python -m alembic upgrade head
+
+      - name: Unit tests
+        run: python -m pytest -m unit
+
+      - name: Integration tests
+        run: python -m pytest -m integration
+
+      - name: Security scan (pip-audit)
+        run: |
+          python -m pip install pip-audit
+          python -m pip_audit -r requirements.txt
+
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        run: npm run build
+
+      - name: Security scan (npm audit)
+        run: npm audit

@@ -106,10 +106,16 @@ Frontend: `http://localhost:5173`
 Run the backend checks from the project root:
 
 ```powershell
-python -m pytest
+python -m pytest -m unit
+python -m pytest -m integration
 python -m ruff check .
 python -m mypy .
 ```
+
+Tests are split into two tiers. Unit tests mock the database session and run in
+under a second; integration tests exercise a real Postgres database (creating
+and dropping a disposable `week2_test_db` alongside your dev database), so the
+Postgres container from step 4 must be running first.
 
 Run the frontend checks from the `frontend` directory:
 
@@ -119,6 +125,10 @@ npm run build
 npm audit
 ```
 
+CI ([.github/workflows/ci.yml](.github/workflows/ci.yml)) runs all of the
+above — plus `pip-audit` for the backend — on every push and pull request
+against `main`.
+
 ## Design Decisions
 
 - Structural geometry is stored as ordered `[x, y, z]` points in millimetres.
@@ -126,6 +136,7 @@ npm audit
 - Member IDs provide readable references to dimension, storey, and grid location.
 - Database changes are managed through Alembic migrations.
 - The member detail endpoint joins in the storey name, material compressive strength, dimension section, and zone pour sequence so the frontend can render a full detail view from a single request.
+- Tests are split into unit (mocked session) and integration (real Postgres) tiers so the fast tier can run constantly while the slow tier still proves the schema behaves.
 
 ## Current Limitations
 
