@@ -18,9 +18,9 @@
   --type-wall: #1f9e6d;
   --type-slab: #c9861a;
 
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: 'IBM Plex Sans', system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: 'IBM Plex Mono', ui-monospace, Consolas, monospace;
+  --sans: 'Ubuntu', system-ui, 'Segoe UI', Roboto;
+  --heading: 'Ubuntu', system-ui, 'Segoe UI', Roboto, sans-serif;
+  --mono: 'Ubuntu Mono', ui-monospace, Consolas, monospace;
 
   font: 18px/145% var(--sans);
   letter-spacing: 0.18px;
