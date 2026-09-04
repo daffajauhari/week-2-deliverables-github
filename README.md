@@ -4,9 +4,7 @@ A full-stack prototype for storing and displaying structural building members. T
 
 ## Screenshot
 
-<!-- Add the final application screenshot here before submission. -->
-
-![Structural member list and detail](docs/member-list-detail.png)
+![Structural member list and detail](docs/final-frontend.png)
 
 ## Architecture
 
@@ -31,35 +29,37 @@ React + TypeScript -> FastAPI -> SQLAlchemy -> PostgreSQL
 ### 1. Clone the repository
 
 ```powershell
-git clone <repository-url>
-cd week-2-deliverables
+git clone https://github.com/daffajauhari/week-2-deliverables-github.git
+cd week-2-deliverables-github
 ```
-
-Replace `<repository-url>` with the GitHub repository URL.
 
 ### 2. Configure environment variables
 
-Copy `.env.example` to `.env`:
+Copy `.env.example` to `.env` in both the project root and the `frontend` directory:
 
 ```powershell
 Copy-Item .env.example .env
+Copy-Item frontend\.env.example frontend\.env
 ```
 
-Complete the values in `.env`:
+Complete the values in the root `.env`:
 
 ```env
-POSTGRES_HOST=localhost
+POSTGRES_PASSWORD=<change>
+POSTGRES_HOST=127.0.0.1
 POSTGRES_PORT=5432
 POSTGRES_USER=your_database_user
-POSTGRES_PASSWORD=your_database_password
 POSTGRES_DB=your_database_name
 FRONTEND_ORIGIN=http://localhost:5173
+VITE_API_BASE_URL=http://localhost:8000
 ```
+
+`frontend/.env` only needs `VITE_API_BASE_URL`, which should match the backend URL above.
 
 ### 3. Set up Python
 
 ```powershell
-py -3.11 -m venv .venv
+py -3.11.9 -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install -r requirements.txt
 ```
@@ -109,7 +109,6 @@ Run the backend checks from the project root:
 python -m pytest
 python -m ruff check .
 python -m mypy .
-python -m pip_audit
 ```
 
 Run the frontend checks from the `frontend` directory:
@@ -126,6 +125,7 @@ npm audit
 - Member dimensions are stored as JSON because their fields vary by member type.
 - Member IDs provide readable references to dimension, storey, and grid location.
 - Database changes are managed through Alembic migrations.
+- The member detail endpoint joins in the storey name, material compressive strength, dimension section, and zone pour sequence so the frontend can render a full detail view from a single request.
 
 ## Current Limitations
 
