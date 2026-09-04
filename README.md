@@ -143,8 +143,3 @@ against `main`.
 - The prototype provides read-only member list and detail endpoints.
 - Synthetic data is loaded through `seed.py`; file upload is not implemented.
 - Authentication and user management are outside the current scope.
-
-## Open Questions
-
-- How should production geometry be validated for each member type?
-- Should future imports accept CSV, spreadsheet, or direct AISIMS data?
